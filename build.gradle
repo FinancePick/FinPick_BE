@@ -1,0 +1,57 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.5'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    // 기본 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // JPA관련
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'mysql:mysql-connector-java:8.0.32'  // 버전은 최신으로 설정 가능
+    implementation 'com.auth0:java-jwt:4.0.0' // JWT 라이브러리
+
+    // test관련
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // 성능 테스트
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+

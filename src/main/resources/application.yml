@@ -1,0 +1,24 @@
+spring:
+  application:
+    name:
+
+  security:
+    user:
+      name: user
+      password: password
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/FinPick
+    username: root
+    password: 12345
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+jwt:
+  secretKey: simplekey123
