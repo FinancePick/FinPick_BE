@@ -9,4 +9,10 @@ public class UserRequest {
 
     private String username;
     private String password;
+
+    @Data
+    public static class ChangePasswordRequest {
+        private String oldPassword;
+        private String newPassword;
+    }
 }

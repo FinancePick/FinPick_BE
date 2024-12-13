@@ -48,4 +48,17 @@ public class UserController {
         return "User ID: " + userId;
     }
 
+    @PatchMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestBody UserRequest.ChangePasswordRequest request) {
+        try {
+            Long userId = customUserDetails.getUserId();
+            userService.changePassword(userId, request);
+            return ResponseEntity.ok("Password changed successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
 }
