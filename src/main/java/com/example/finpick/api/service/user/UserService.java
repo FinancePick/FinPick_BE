@@ -40,21 +40,21 @@ public class UserService {
     }
 
     public UserResponse login(UserRequest userRequest) {
-        UserResponse userResponse = new UserResponse();
-
         User user = userRepository.findByUsername(userRequest.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        if (passwordEncoder.matches(userRequest.getPassword(), user.getPassword())) {
-            String token = jwtUtil.generateToken(user.getUsername());
-            userResponse.setToken(token);
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (!passwordEncoder.matches(userRequest.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Invalid password");
         }
 
+        String token = jwtUtil.generateToken(user.getUsername());
+        UserResponse userResponse = new UserResponse();
+        userResponse.setToken(token);
         userResponse.setId(user.getId());
         userResponse.setName(user.getUsername());
 
         return userResponse;
     }
-
 
     public UserResponseNoToken findByID(Long id) {
         User user = userRepository.findById(id).orElseThrow();
@@ -98,4 +98,10 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public void deleteAccount(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        userRepository.delete(user);
+    }
 }
