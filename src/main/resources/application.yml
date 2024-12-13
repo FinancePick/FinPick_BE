@@ -10,7 +10,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/FinPick
     username: root
-    password: 12345
+    password: 1109
 
   jpa:
     hibernate:
