@@ -23,5 +23,9 @@ public class User {
     @Column(nullable = false)
     private String role ;
 
+    @Column(nullable = false) // level 필드 추가
+    private String level = "beginner"; // 기본값 설정
+
     // Getters and Setters
 }
+
