@@ -1,7 +1,8 @@
 package com.example.finpick.api.controller.QuizController;
 
 import com.example.finpick.domain.word.WordListRepository;
-import com.example.finpick.domain.word.wordList;
+import com.example.finpick.domain.word.WordList;
+import com.example.finpick.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,12 +19,15 @@ public class QuizController {
     @Autowired
     private WordListRepository wordListRepository;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PostMapping("/quiz")
-    //public QuizResult handleQuiz(@RequestParam String level, @RequestBody List<QuizAnswer> answers) {
-    public QuizResult handleQuiz(@RequestBody QuizRequest request) {
-        // 사용자 레벨에 따라 id 범위 설정
-        String level = request.getLevel();
-        List<QuizAnswer> answers = request.getAnswers();
+    public QuizResult handleQuiz(@RequestHeader("Authorization") String authorizationHeader,
+                                 @RequestBody QuizRequest request) {
+        String token = authorizationHeader.replace("Bearer ", "");
+        String level = jwtUtil.getLevelFromToken(token);
+
         int startId, endId;
         switch (level.toLowerCase()) {
             case "beginner":
@@ -46,30 +50,30 @@ public class QuizController {
                 throw new IllegalArgumentException("Invalid level: " + level);
         }
 
-        // 퀴즈에 무작위 단어 10개 가져오기
-        List<wordList> wordPool = wordListRepository.findByIdBetween(startId, endId);
+        // 랜덤 퀴즈 단어 가져오기
+        List<WordList> wordPool = wordListRepository.findByIdBetween(startId, endId);
         Collections.shuffle(wordPool);
-        List<wordList> quizWords = wordPool.stream().limit(10).collect(Collectors.toList());
+        List<WordList> quizWords = wordPool.stream().limit(10).collect(Collectors.toList());
 
-        // 정답 mapping 준비
+        // 정답 mapping 만들기
         Map<Long, String> correctAnswers = quizWords.stream()
-                .collect(Collectors.toMap(wordList::getId, wordList::getWord));
+                .collect(Collectors.toMap(WordList::getId, WordList::getWord));
 
-        // 사용자 답변 검증
+        // 사용자 답안 확인
         List<Integer> incorrectQuestions = new ArrayList<>();
         int correctCount = 0;
 
-        for (int i = 0; i < answers.size(); i++) {
-            QuizAnswer answer = answers.get(i);
+        for (int i = 0; i < request.getAnswers().size(); i++) {
+            QuizAnswer answer = request.getAnswers().get(i);
             String correctWord = correctAnswers.get(answer.getQuestionId());
             if (correctWord != null && correctWord.equals(answer.getSelectedAnswer())) {
                 correctCount++;
             } else {
-                incorrectQuestions.add(i + 1); // 질문 번호는 1번 기반
+                incorrectQuestions.add(i + 1);
             }
         }
 
-        // 사용자 레벨 업 여부 확인
+        // 사용자 레벨업 여부 확인
         boolean levelUp = correctCount >= 8;
 
         return new QuizResult(levelUp, incorrectQuestions);
@@ -116,14 +120,15 @@ public class QuizController {
         }
     }
 
-    //
     public static class QuizRequest {
-        private String level;
         private List<QuizAnswer> answers;
-        // Getters and setters
-        public String getLevel() { return level; }
-        public void setLevel(String level) { this.level = level; }
-        public List<QuizAnswer> getAnswers() { return answers; }
-        public void setAnswers(List<QuizAnswer> answers) { this.answers = answers; }
+
+        public List<QuizAnswer> getAnswers() {
+            return answers;
+        }
+
+        public void setAnswers(List<QuizAnswer> answers) {
+            this.answers = answers;
+        }
     }
 }
