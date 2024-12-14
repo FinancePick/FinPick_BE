@@ -23,10 +23,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-
     public UserResponseNoToken signUp(UserRequest userRequest) {
-
-        // 이미 존재하는 사용자 이름 체크
         if (userRepository.existsByUsername(userRequest.getUsername())) {
             throw new IllegalArgumentException("이미 존재하는 사용자 이름입니다.");
         }
@@ -35,51 +32,30 @@ public class UserService {
         user.setUsername(userRequest.getUsername());
         user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         user.setRole("User");
+        user.setLevel("beginner"); // 기본 레벨 추가
 
         return entityToSignDto(userRepository.save(user));
     }
 
     public UserResponse login(UserRequest userRequest) {
-        UserResponse userResponse = new UserResponse();
-
         User user = userRepository.findByUsername(userRequest.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
         if (passwordEncoder.matches(userRequest.getPassword(), user.getPassword())) {
-            String token = jwtUtil.generateToken(user.getUsername());
-            userResponse.setToken(token);
+            String token = jwtUtil.generateToken(user.getUsername(), user.getLevel()); // 토큰에 레벨 포함
+            return new UserResponse(user.getId(), user.getUsername(), token);
+        } else {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
-
-        userResponse.setId(user.getId());
-        userResponse.setName(user.getUsername());
-
-        return userResponse;
     }
-
 
     public UserResponseNoToken findByID(Long id) {
         User user = userRepository.findById(id).orElseThrow();
         return entityToSignDto(user);
     }
 
-    private String getAuthenticatedUsername() { //현재 인증된 사용자의 Username 반환
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            return userDetails.getUsername();
-        }
-        return null;
-    }
-    private UserResponse entityToDto(User user) {
-        UserResponse userResponse = new UserResponse();
-        userResponse.setId(user.getId());
-        userResponse.setName(user.getUsername());
-        return userResponse;
-    }
 
     private UserResponseNoToken entityToSignDto(User user) {
-        UserResponseNoToken userResponseNoToken = new UserResponseNoToken();
-        userResponseNoToken.setId(user.getId());
-        userResponseNoToken.setName(user.getUsername());
-        return userResponseNoToken;
+        return new UserResponseNoToken(user.getId(), user.getUsername());
     }
 }
