@@ -1,12 +1,10 @@
 package com.example.finpick.api.controller.WordController;
 
 import com.example.finpick.domain.word.WordListRepository;
-import com.example.finpick.domain.word.wordList;
+import com.example.finpick.domain.word.WordList;
+import com.example.finpick.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -18,9 +16,21 @@ public class WordController {
     @Autowired
     private WordListRepository wordListRepository;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @GetMapping("/daily-word")
-    public WordResponse getDailyWord(@RequestParam String username, @RequestParam String password, @RequestParam String level) {
-        // 사용자 레벨에 따라 id 범위 설정
+    public WordResponse getDailyWord(@RequestHeader("Authorization") String authorizationHeader) {
+
+        String token = authorizationHeader.replace("Bearer ", "");
+
+        String level;
+        try {
+            level = jwtUtil.getLevelFromToken(token);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid JWT token", e);
+        }
+
         int startId, endId;
         switch (level.toLowerCase()) {
             case "beginner":
@@ -43,20 +53,18 @@ public class WordController {
                 throw new IllegalArgumentException("Invalid level: " + level);
         }
 
-        // 날짜를 기준으로 오늘의 index 계산
         LocalDate today = LocalDate.now();
         int dayOfMonth = today.getDayOfMonth();
         int range = endId - startId + 1;
         int todayIndex = (dayOfMonth - 1) % range + startId;
 
-        // 데이터베이스에서 단어 가져오기
-        Optional<wordList> optionalWord = wordListRepository.findById((long) todayIndex);
-        if (optionalWord.isPresent()) {
-            wordList word = optionalWord.get();
-            return new WordResponse(level, word.getWord(), word.getDescription());
-        } else {
-            throw new RuntimeException("Word not found for ID: " + todayIndex);
+        Optional<WordList> optionalWord = wordListRepository.findById((long) todayIndex);
+        if (optionalWord.isEmpty()) {
+            throw new IllegalStateException("Word not found for ID: " + todayIndex);
         }
+
+        WordList word = optionalWord.get();
+        return new WordResponse(level, word.getWord(), word.getDescription());
     }
 
     // DTO for response

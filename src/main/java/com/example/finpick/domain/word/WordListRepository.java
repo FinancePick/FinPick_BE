@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface WordListRepository extends JpaRepository<wordList, Long> {
-    List<wordList> findByIdBetween(int startId, int endId);
+public interface WordListRepository extends JpaRepository<WordList, Long> {
+    List<WordList> findByIdBetween(int startId, int endId);
 }
