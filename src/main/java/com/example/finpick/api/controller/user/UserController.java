@@ -30,10 +30,6 @@ public class UserController {
     }
 
     @PostMapping("/login")
-//    public ResponseEntity<UserResponse> login(@RequestBody UserRequest request) {
-//        UserResponse login = userService.login(request);
-//        return ResponseEntity.ok(login);
-//    }
     public ResponseEntity<?> login(@RequestBody UserRequest request) {
         try {
             UserResponse login = userService.login(request);
