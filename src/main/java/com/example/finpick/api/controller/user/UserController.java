@@ -30,9 +30,22 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserResponse> login(@RequestBody UserRequest request) {
-        UserResponse login = userService.login(request);
-        return ResponseEntity.ok(login);
+//    public ResponseEntity<UserResponse> login(@RequestBody UserRequest request) {
+//        UserResponse login = userService.login(request);
+//        return ResponseEntity.ok(login);
+//    }
+    public ResponseEntity<?> login(@RequestBody UserRequest request) {
+        try {
+            UserResponse login = userService.login(request);
+            return ResponseEntity.ok(login);
+        } catch (IllegalArgumentException e) {
+            if (e.getMessage().equals("Invalid password")) {
+                return ResponseEntity.status(401).body(new ErrorResponse("Incorrect password."));
+            } else if (e.getMessage().equals("User not found")) {
+                return ResponseEntity.status(403).body(new ErrorResponse("User does not exist."));
+            }
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     @GetMapping("/myService")
@@ -46,6 +59,30 @@ public class UserController {
         // CustomUserDetails에서 userId 가져오기
         Long userId = customUserDetails.getUserId();
         return "User ID: " + userId;
+    }
+
+    @PatchMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestBody UserRequest.ChangePasswordRequest request) {
+        try {
+            Long userId = customUserDetails.getUserId();
+            userService.changePassword(userId, request);
+            return ResponseEntity.ok("Password changed successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/delete-account")
+    public ResponseEntity<?> deleteAccount(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        try {
+            Long userId = customUserDetails.getUserId();
+            userService.deleteAccount(userId);
+            return ResponseEntity.ok("Account deleted successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
     }
 
 }

@@ -58,4 +58,23 @@ public class UserService {
     private UserResponseNoToken entityToSignDto(User user) {
         return new UserResponseNoToken(user.getId(), user.getUsername());
     }
+
+    public void changePassword(Long userId, UserRequest.ChangePasswordRequest request) {
+        // 사용자 정보 가져오기
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        // 현재 비밀번호 확인
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect.");
+        }
+        // 새 비밀번호 설정
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    public void deleteAccount(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        userRepository.delete(user);
+    }
 }
