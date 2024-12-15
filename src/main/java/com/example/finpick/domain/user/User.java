@@ -21,7 +21,10 @@ public class User {
     private String password;
 
     @Column(nullable = false)
-    private String role ;
+    private String role;
+
+    @Column(nullable = false)
+    private String level = "beginner"; // Default value for new users
 
     // Getters and Setters
 }

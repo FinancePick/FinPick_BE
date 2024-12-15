@@ -19,6 +19,8 @@ public class CustomUserDetails implements UserDetails {
         return user.getId();  // userId 반환
     }
 
+    public String getLevel(){return user.getLevel();}
+
     @Override
     public List<GrantedAuthority> getAuthorities() {
         // 권한을 반환합니다. 예시로 "ROLE_USER"만 설정.

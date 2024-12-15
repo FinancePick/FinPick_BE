@@ -28,13 +28,14 @@ public class UserService {
 
         // 이미 존재하는 사용자 이름 체크
         if (userRepository.existsByUsername(userRequest.getUsername())) {
-            throw new IllegalArgumentException("이미 존재하는 사용자 이름입니다.");
+            throw new IllegalArgumentException("Existing user.");
         }
 
         User user = new User();
         user.setUsername(userRequest.getUsername());
         user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         user.setRole("User");
+        user.setLevel("BEGINNER"); // Default level for new users
 
         return entityToSignDto(userRepository.save(user));
     }
@@ -52,6 +53,7 @@ public class UserService {
         userResponse.setToken(token);
         userResponse.setId(user.getId());
         userResponse.setName(user.getUsername());
+        userResponse.setLevel(user.getLevel());
 
         return userResponse;
     }
@@ -80,6 +82,7 @@ public class UserService {
         UserResponseNoToken userResponseNoToken = new UserResponseNoToken();
         userResponseNoToken.setId(user.getId());
         userResponseNoToken.setName(user.getUsername());
+        userResponseNoToken.setLevel(user.getLevel());
         return userResponseNoToken;
     }
 
@@ -104,4 +107,32 @@ public class UserService {
 
         userRepository.delete(user);
     }
+
+    public void levelUp(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        String currentLevel = user.getLevel();
+        String nextLevel;
+
+        switch (currentLevel) {
+            case "BEGINNER":
+                nextLevel = "MEDIUM";
+                break;
+            case "MEDIUM":
+                nextLevel = "ADVANCED";
+                break;
+            case "ADVANCED":
+                nextLevel = "PROFESSIONAL";
+                break;
+            case "PROFESSIONAL":
+                throw new IllegalArgumentException("User is already at the highest level.");
+            default:
+                throw new IllegalArgumentException("Invalid level.");
+        }
+
+        user.setLevel(nextLevel);
+        userRepository.save(user);
+    }
+
 }

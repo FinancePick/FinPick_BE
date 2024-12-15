@@ -79,4 +79,15 @@ public class UserController {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
+    @PatchMapping("/level-up")
+    public ResponseEntity<?> levelUp(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        try {
+            Long userId = customUserDetails.getUserId();
+            userService.levelUp(userId);
+            return ResponseEntity.ok("Level up successful.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
 }
