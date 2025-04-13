@@ -1,6 +1,10 @@
 package com.example.finpick.domain.word;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,7 +22,4 @@ public class Word {
 
     @Column(nullable = false)
     private String meaning;
-
-    @Column(nullable = false)
-    private String level; // 단어의 레벨
 }

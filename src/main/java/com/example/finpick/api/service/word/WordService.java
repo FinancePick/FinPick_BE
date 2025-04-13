@@ -1,15 +1,21 @@
 package com.example.finpick.api.service.word;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+
+import org.springframework.stereotype.Service;
+
 import com.example.finpick.api.service.word.response.QuizQuestion;
 import com.example.finpick.domain.user.User;
 import com.example.finpick.domain.user.UserRepository;
 import com.example.finpick.domain.word.Word;
 import com.example.finpick.domain.word.WordRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.*;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -23,14 +29,11 @@ public class WordService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // 사용자 레벨 가져오기 (Beginner, Intermediate 등)
-        String userLevel = user.getLevel();
-
-        // 해당 레벨의 단어 목록 조회
-        List<Word> words = wordRepository.findByLevel(userLevel);
+        // 모든 단어 목록 조회
+        List<Word> words = wordRepository.findAll();
 
         if (words.isEmpty()) {
-            throw new IllegalArgumentException("No words available for this level.");
+            throw new IllegalArgumentException("No words available.");
         }
 
         // 날짜 기반 단어 인덱스 계산
@@ -50,11 +53,8 @@ public class WordService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // 사용자 레벨 가져오기
-        String userLevel = user.getLevel();
-
-        // 해당 레벨의 단어 목록 가져오기
-        List<Word> words = wordRepository.findByLevel(userLevel);
+        // 모든 단어 목록 가져오기
+        List<Word> words = wordRepository.findAll();
         if (words.size() < 4) {
             throw new IllegalArgumentException("Not enough words available for quiz generation.");
         }
