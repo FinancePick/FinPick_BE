@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.finpick.api.service.word.response.QuizQuestion;
@@ -89,5 +91,13 @@ public class WordService {
         }
 
         return quiz;
+    }
+
+    public Page<Word> getAllWords(String username, Pageable pageable) {
+        //사용자 정보 가져오기
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        return wordRepository.findAll(pageable);
     }
 }

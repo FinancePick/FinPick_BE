@@ -5,6 +5,9 @@ import com.example.finpick.api.service.word.response.QuizQuestion;
 import com.example.finpick.domain.word.Word;
 import com.example.finpick.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -38,4 +41,12 @@ public class WordController {
         return ResponseEntity.ok(quiz);
     }
 
+    @GetMapping("/list")
+    public ResponseEntity<Page<Word>> getAllWords(
+            @RequestHeader("Authorization") String token,
+            @PageableDefault(size = 10) Pageable pageable) {
+        String username = jwtUtil.extractUsername(token.replace("Bearer ", ""));
+        Page<Word> words = wordService.getAllWords(username, pageable);
+        return ResponseEntity.ok(words);
+    }
 }
