@@ -55,3 +55,24 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+//git submodule을 사용해서 submodule에 있는 application.yml을  빌드하기전에 복사해서 가져오는 작업
+/*
+// (1)
+processResources.dependsOn('copySecret')
+// (2)
+tasks.register('copySecret', Copy) {
+    copy {
+        from '../submodule'
+        include "application.yml"
+        into './src/main/resources'
+    }
+}
+*/
+
+task copyPrivate(type: Copy) {
+    copy {
+        from './submodule'
+        include "application.yml"
+        into 'src/main/resources'
+    }
+}
