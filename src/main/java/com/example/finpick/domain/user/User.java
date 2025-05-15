@@ -26,5 +26,12 @@ public class User {
     @Column(nullable = false)
     private String level = "beginner"; // Default value for new users
 
+    public User(String username) {
+        this.username = username;
+        this.password = null;
+        this.role = "USER";
+        this.level = "beginner";
+    }
+
     // Getters and Setters
 }
