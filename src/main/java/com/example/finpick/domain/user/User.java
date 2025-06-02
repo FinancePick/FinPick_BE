@@ -25,6 +25,4 @@ public class User {
 
     @Column(nullable = false)
     private String level = "beginner"; // Default value for new users
-
-    // Getters and Setters
 }

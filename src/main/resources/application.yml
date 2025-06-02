@@ -8,7 +8,7 @@ spring:
       password: password
 
   datasource:
-    url: jdbc:mysql://152.69.229.186:3306/finpick
+    url: jdbc:mysql://localhost:3306/finpick
     username: root
     password: 1234
 
